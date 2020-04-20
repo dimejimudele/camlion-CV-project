@@ -179,16 +179,16 @@ while True:
                         boxes.append([x, y, int(width), int(height)])
                         confidences.append(float(confidence))
                         classIDs.append(classID)
-        mamasidx = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"],0.1)
+        my_idx = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"],0.1)
                         
 
 
                         
 
         # ensure at least one detection exists
-        if len(mamasidx) > 0:
+        if len(my_idx) > 0:
             # loop over the indexes we are keeping
-            for i in mamasidx.flatten():
+            for i in my_idx.flatten():
                 
                 endx = int(boxes[i][0] + boxes[i][2])
                 endy = int(boxes[i][1] + boxes[i][3])
@@ -258,7 +258,7 @@ while True:
     # draw a horizontal line in the center of the frame -- once an
     # object crosses this line we will determine whether they were
     # moving 'up' or 'down'
-    cv2.line(frame, (0, H // 2), (W, H // 2), (0, 255, 255), 2)
+    #cv2.line(frame, (0, H // 2), (W, H // 2), (0, 255, 255), 2)
 
     # use the centroid tracker to associate the (1) old object
     # centroids with (2) the newly computed object centroids
@@ -306,7 +306,7 @@ while True:
 
         # draw both the ID of the object and the centroid of the
         # object on the output frame
-        text = "Bandido {}".format(objectID)
+        text = "camlion detection  {}".format(objectID)
         cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
