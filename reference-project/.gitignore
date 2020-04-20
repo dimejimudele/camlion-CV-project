@@ -1,0 +1,6 @@
+*.weights
+*/videos
+*/output
+*.pyc
+
+
