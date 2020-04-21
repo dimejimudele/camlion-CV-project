@@ -1,6 +1,6 @@
 *.weights
-*/videos
-*/output
+videos/*
+output/*
 *.pyc
 *.vscode
 

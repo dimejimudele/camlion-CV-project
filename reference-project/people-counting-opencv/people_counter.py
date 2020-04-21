@@ -34,7 +34,7 @@ ap.add_argument("-o", "--output", type=str,
     help="path to optional output video file")
 ap.add_argument("-c", "--confidence", type=float, default=0.4,
     help="minimum probability to filter weak detections")
-ap.add_argument("-s", "--skip-frames", type=int, default=30,
+ap.add_argument("-s", "--skip-frames", type=int, default=1,
     help="# of skip frames between detections")
 args = vars(ap.parse_args())
 
@@ -73,12 +73,18 @@ writer = None
 W = None
 H = None
 
+
+##########3NOT ADDED 
+
 # instantiate our centroid tracker, then initialize a list to store
 # each of our dlib correlation trackers, followed by a dictionary to
 # map each unique object ID to a TrackableObject
 ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
 trackers = []
 trackableObjects = {}
+
+
+#########3
 
 # initialize the total number of frames processed thus far, along
 # with the total number of objects that have moved either up or down
