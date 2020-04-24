@@ -9,7 +9,6 @@ class BirdEyeView(object):
         self.image_coordinates = []
 
     def get4pointsView(self):
-        print(self.capture.isOpened())
         if self.capture.isOpened():
             (self.status, self.frame) = self.capture.read()
             cv2.imshow('first frame', self.frame)

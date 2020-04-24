@@ -82,12 +82,12 @@ def people_tracker(args):
         if args["input"] is not None and frame is None:
             break
 
+        cv2.namedWindow('Frame', cv2.WINDOW_NORMAL)
         # resize the frame to have a maximum width of 500 pixels (the
         # less data we have, the faster we can process it), then convert
         # the frame from BGR to RGB for dlib
         frame = imutils.resize(frame, width=500)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
 
         # if the frame dimensions are empty, set them
         if W is None or H is None:
@@ -165,6 +165,7 @@ def people_tracker(args):
                     cv2.line(frame, centroids[i], centroids[i-1], (0, 255, 255), 2)
 
         # show the output frame
+        cv2.setWindowProperty('Frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
 
@@ -198,11 +199,14 @@ def people_tracker(args):
     cv2.destroyAllWindows()
 
 def continueAfterBirdEye():
-    start = input("Do you want to continue or try again? [Y/n] ")
+    start = input("Are you satisfied with the points marked? [Y/n/q] ")
     if (start.lower() == 'y'):
-        return False
-    elif(start.lower() == 'n'):
         return True
+    elif(start.lower() == 'n'):
+        return False
+    elif(start.lower() == 'q'):
+        print("\nQuitting the program...")
+        return exit(1)
     else:
         print("Didn't get that...")
         return continueAfterBirdEye()
