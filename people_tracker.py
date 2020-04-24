@@ -1,4 +1,5 @@
-# import the necessary packages
+#!/usr/bin/env python
+
 from imutils.video import VideoStream
 from imutils.video import FPS
 import numpy as np
@@ -9,7 +10,7 @@ import dlib
 import cv2
 import os
 import math
-
+from bird_eye_view import BirdEyeView
 
 def people_tracker(args):
 
@@ -54,6 +55,19 @@ def people_tracker(args):
     totalDown = 0
     totalUp = 0
 
+    # Setup bird eye view
+    start = False
+    while (not start):
+        print("Please input coordenates in image.")
+        birdEyeView = BirdEyeView(vs)
+        birdEyeView.get_four_point_view()
+        start = continue_after_bird_eye()
+
+    print('******************************************')
+    # [[top-left], [bottom-left], [top-right], [bottom-right]]
+    plane_coordinates = birdEyeView.ordered_points()
+    print_plane_coordinates(plane_coordinates)
+
     # start the frames per second throughput estimator
     fps = FPS().start()
 
@@ -69,12 +83,14 @@ def people_tracker(args):
         if args["input"] is not None and frame is None:
             break
 
+        cv2.namedWindow('Frame', cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty('Frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
         # resize the frame to have a maximum width of 500 pixels (the
         # less data we have, the faster we can process it), then convert
         # the frame from BGR to RGB for dlib
         frame = imutils.resize(frame, width=500)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
 
         # if the frame dimensions are empty, set them
         if W is None or H is None:
@@ -157,7 +173,7 @@ def people_tracker(args):
                     cv2.line(frame, centroids[i], centroids[i-1], (0, 255, 255), 2)
 
         # show the output frame
-        cv2.imshow("Frame", frame)
+        cv2.imshow('Frame', frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
@@ -187,6 +203,25 @@ def people_tracker(args):
     # close any open windows
     cv2.destroyAllWindows()
 
+def continue_after_bird_eye():
+    start = input("Are you satisfied with the points marked? [Y/n/q] ")
+    if (start.lower() == 'y'):
+        return True
+    elif(start.lower() == 'n'):
+        return False
+    elif(start.lower() == 'q'):
+        print("\nQuitting the program...")
+        return exit(1)
+    else:
+        print("Didn't get that...")
+        return continueAfterBirdEye()
+
+def print_plane_coordinates(plane_coordinates):
+    print("Plane coordinates:")
+    print("Top-left: {}".format(plane_coordinates[0]))
+    print("Bottom-left: {}".format(plane_coordinates[1]))
+    print("Top-right: {}".format(plane_coordinates[2]))
+    print("Bottom-right: {}".format(plane_coordinates[3]))
 
 if __name__ == '__main__':
 
