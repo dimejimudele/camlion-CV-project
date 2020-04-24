@@ -2,7 +2,6 @@
 
 import argparse
 import cv2
-from pynput.keyboard import Key
 
 class BirdEyeView(object):
     def __init__(self, capture):
