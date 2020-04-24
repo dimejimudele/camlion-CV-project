@@ -1,4 +1,5 @@
-# import the necessary packages
+#!/usr/bin/env python
+
 from imutils.video import VideoStream
 from imutils.video import FPS
 import numpy as np
@@ -9,18 +10,18 @@ import dlib
 import cv2
 import os
 import math
-
+from bird_eye_view import BirdEyeView
 
 def people_tracker(args):
 
     # load the COCO class labels our YOLO model was trained on
     labelsPath = args["labels"]
-    LABELS = open(labelsPath).read().strip().split("\n")   
+    LABELS = open(labelsPath).read().strip().split("\n")
 
     # load our serialized model from disk
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromDarknet(args["config"], args["model"])
-    
+
     # determine only the *output* layer names that we need from YOLO
     ln = net.getLayerNames()
     ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
@@ -53,6 +54,18 @@ def people_tracker(args):
     totalFrames = 0
     totalDown = 0
     totalUp = 0
+
+    # Setup bird eye view
+    start = False
+    while (not start):
+        print("Please input coordenates in image.")
+        birdEyeView = BirdEyeView(vs)
+        birdEyeView.get4pointsView()
+        start = continueAfterBirdEye()
+
+    print('******************************************')
+    print('Continuing program...')
+    print(birdEyeView.image_coordinates)
 
     # start the frames per second throughput estimator
     fps = FPS().start()
@@ -100,12 +113,12 @@ def people_tracker(args):
             for detection in output:
                 # extract the class ID and confidence (i.e., probability) of
                 # the current object detection
-                
+
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
 
-                if LABELS[classID] == "person": 
+                if LABELS[classID] == "person":
                         # filter out weak predictions by ensuring the detected
                         # probability is greater than the minimum probability
                         if confidence > args["confidence"]:
@@ -127,7 +140,7 @@ def people_tracker(args):
                             confidences.append(float(confidence))
                             centroids.append((int(centerX), int(centerY)))
                             classIDs.append(classID)
-        
+
         my_idx = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"], args["threshold"])
 
         # ensure at least one detection exists
@@ -150,12 +163,10 @@ def people_tracker(args):
 
                 if i != 0:
                     cv2.line(frame, centroids[i], centroids[i-1], (0, 255, 255), 2)
-        
+
         # show the output frame
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
-
-        
 
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -165,7 +176,7 @@ def people_tracker(args):
         # then update the FPS counter
         totalFrames += 1
         fps.update()
-        
+
     # stop the timer and display FPS information
     fps.stop()
     print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
@@ -186,8 +197,16 @@ def people_tracker(args):
     # close any open windows
     cv2.destroyAllWindows()
 
+def continueAfterBirdEye():
+    start = input("Do you want to continue or try again? [Y/n] ")
+    if (start.lower() == 'y'):
+        return False
+    elif(start.lower() == 'n'):
+        return True
+    else:
+        print("Didn't get that...")
+        return continueAfterBirdEye()
 
-            
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -209,4 +228,3 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     people_tracker(args)
-
