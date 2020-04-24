@@ -2,13 +2,14 @@
 
 import argparse
 import cv2
+import numpy as np
 
 class BirdEyeView(object):
     def __init__(self, capture):
         self.capture = capture
         self.image_coordinates = []
 
-    def get4pointsView(self):
+    def get_four_point_view(self):
         if self.capture.isOpened():
             (self.status, self.frame) = self.capture.read()
             cv2.imshow('first frame', self.frame)
@@ -17,13 +18,11 @@ class BirdEyeView(object):
             cv2.namedWindow('first frame')
             cv2.setMouseCallback('first frame', self.extract_coordinates)
 
-            key = cv2.waitKey(0)
+            key = cv2.waitKey(0) & 0xFF
             if (key == ord('q')):
-                key = cv2.waitKey(0)
                 cv2.destroyAllWindows()
                 exit(1)
             else:
-                print(self.image_coordinates)
                 cv2.destroyWindow('first frame')
 
     def extract_coordinates(self, event, x, y, flags, parameters):
@@ -43,3 +42,23 @@ class BirdEyeView(object):
         # Draw rectangle around ROI
         #cv2.rectangle(self.clone, self.image_coordinates[0], self.image_coordinates[1], (0,255,0), 2)
         cv2.imshow('first frame', self.clone)
+
+    def ordered_points(self):
+        pts = np.array(self.image_coordinates, dtype = "int32")
+        rect = np.zeros((4, 2), dtype = "int32")
+
+        sum = pts.sum(axis = 1)
+        top_left = np.argmin(sum)
+        bottom_right = np.argmax(sum)
+        rect[0] = pts[top_left] # top-left
+        rect[3] = pts[bottom_right] # bottom-right
+
+        pts = np.delete(pts, top_left, 0)
+        bottom_right = bottom_right if (bottom_right < top_left) else (bottom_right - 1)
+        pts = np.delete(pts, bottom_right, 0)
+
+        diff = np.diff(pts, axis = 1)
+        rect[2] = pts[np.argmin(diff)] # top-right
+        rect[1] = pts[np.argmax(diff)] # bottom-left
+
+        return rect
