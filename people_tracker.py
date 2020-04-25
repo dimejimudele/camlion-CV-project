@@ -75,7 +75,7 @@ def people_tracker(args):
         frame = imutils.resize(frame, width=500)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        frame= bightness_contrast_enhance(frame, alpha = 1.6, beta = 0)
+        frame= bightness_contrast_enhance(frame, alpha = args["alpha"], beta = args["beta"])
       
 
         # if the frame dimensions are empty, set them
@@ -230,8 +230,12 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--skip_frames", type=int, default=2,
         help="# of skip frames between detections")
     parser.add_argument("-l", "--labels", type=str, help="path to the classes file")
-    parser.add_argument("-t", "--threshold", type=float, default=0.1,
-	help="threshold when applying non-maxima suppression")
+    parser.add_argument("-t", "--threshold", type=float, default=0.2,
+	   help="threshold when applying non-maxima suppression")
+    parser.add_argument("-a", "--alpha", type=float, default=1.5,
+        help="alpha parameter for for input frame contrast enhancement (0 - 3")
+    parser.add_argument("-b", "--beta", type=float, default= 0,
+        help="beta parameter for input frame brightness enhancement (0 - 100)")
     args = vars(parser.parse_args())
 
     people_tracker(args)
