@@ -133,6 +133,11 @@ def people_tracker(args):
         if W is None or H is None:
             (H, W) = frame.shape[:2]
 
+        if (totalFrames % args["skip_frames"] != 0):
+            totalFrames += 1
+            fps.update()
+            continue
+
         # convert the frame to a blob and pass the blob through the
         # network and obtain the detections
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416),
@@ -242,8 +247,6 @@ def people_tracker(args):
         # show the output frame
         cv2.imshow('Frame', frame)
         key = cv2.waitKey(1) & 0xFF
-
-        # if the `q` key was pressed, break from the loop
         if key == ord("q"):
             break
 
@@ -288,7 +291,7 @@ if __name__ == '__main__':
         help="path to optional output video file")
     parser.add_argument("-c", "--confidence", type=float, default=0.3,
         help="minimum probability to filter weak detections")
-    parser.add_argument("-s", "--skip_frames", type=int, default=2,
+    parser.add_argument("-s", "--skip_frames", type=int, default=3,
         help="# of skip frames between detections")
     parser.add_argument("-l", "--labels", type=str, help="path to the classes file")
     parser.add_argument("-t", "--threshold", type=float, default=0.3,
