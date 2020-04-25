@@ -197,7 +197,7 @@ def bightness_contrast_enhance(image, alpha = 1.6, beta = 0):
     """
     return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
-def clahe_denoising_enhancement(image, tile_grid_size = (8, 8), clip_limit = 0.3)
+def clahe_denoising_enhancement(image, tile_grid_size = (8, 8), clip_limit = 0.3):
     """
     image: RGB
 
