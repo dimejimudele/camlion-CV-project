@@ -1,4 +1,5 @@
-# import the necessary packages
+#!/usr/bin/env python
+
 from imutils.video import VideoStream
 from imutils.video import FPS
 import numpy as np
@@ -9,20 +10,22 @@ import dlib
 import cv2
 import os
 import math
+from bird_eye_view import BirdEyeView
 
 def euclidian_distance(x1, y1, x2, y2):
     return math.sqrt((x2-x1)**2+(y2-y1)**2)
+
 
 def people_tracker(args):
 
     # load the COCO class labels our YOLO model was trained on
     labelsPath = args["labels"]
-    LABELS = open(labelsPath).read().strip().split("\n")   
+    LABELS = open(labelsPath).read().strip().split("\n")
 
     # load our serialized model from disk
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromDarknet(args["config"], args["model"])
-    
+
     # determine only the *output* layer names that we need from YOLO
     ln = net.getLayerNames()
     ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
@@ -56,6 +59,19 @@ def people_tracker(args):
     totalDown = 0
     totalUp = 0
 
+    # Setup bird eye view
+    start = False
+    while (not start):
+        print("Please input coordenates in image.")
+        birdEyeView = BirdEyeView(vs)
+        birdEyeView.get_four_point_view()
+        start = continue_after_bird_eye()
+
+    print('******************************************')
+    # [[top-left], [bottom-left], [top-right], [bottom-right]]
+    plane_coordinates = birdEyeView.ordered_points()
+    print_plane_coordinates(plane_coordinates)
+
     # start the frames per second throughput estimator
     fps = FPS().start()
 
@@ -71,13 +87,14 @@ def people_tracker(args):
         if args["input"] is not None and frame is None:
             break
 
+        cv2.namedWindow('Frame', cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty('Frame', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
         # resize the frame to have a maximum width of 500 pixels (the
         # less data we have, the faster we can process it), then convert
         # the frame from BGR to RGB for dlib
         frame = imutils.resize(frame, width=1000)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-
 
         # if the frame dimensions are empty, set them
         if W is None or H is None:
@@ -103,12 +120,12 @@ def people_tracker(args):
             for detection in output:
                 # extract the class ID and confidence (i.e., probability) of
                 # the current object detection
-                
+
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
 
-                if LABELS[classID] == "person": 
+                if LABELS[classID] == "person":
                         # filter out weak predictions by ensuring the detected
                         # probability is greater than the minimum probability
                         if confidence > args["confidence"]:
@@ -130,7 +147,7 @@ def people_tracker(args):
                             confidences.append(float(confidence))
                             centroids.append((int(centerX), int(centerY)))
                             classIDs.append(classID)
-        
+
         my_idx = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"], args["threshold"])
 
         # ensure at least one detection exists
@@ -163,11 +180,12 @@ def people_tracker(args):
                         cv2.line(frame, centroids[i], centroids[j], color, 2)
         
     
-        # show the output frame
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1) & 0xFF
+                if i != 0:
+                    cv2.line(frame, centroids[i], centroids[i-1], (0, 255, 255), 2)
 
-        
+        # show the output frame
+        cv2.imshow('Frame', frame)
+        key = cv2.waitKey(1) & 0xFF
 
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -177,7 +195,7 @@ def people_tracker(args):
         # then update the FPS counter
         totalFrames += 1
         fps.update()
-        
+
     # stop the timer and display FPS information
     fps.stop()
     print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
@@ -198,8 +216,26 @@ def people_tracker(args):
     # close any open windows
     cv2.destroyAllWindows()
 
+def continue_after_bird_eye():
+    start = input("Are you satisfied with the points marked? [Y/n/q] ")
+    if (start.lower() == 'y'):
+        return True
+    elif(start.lower() == 'n'):
+        return False
+    elif(start.lower() == 'q'):
+        print("\nQuitting the program...")
+        return exit(1)
+    else:
+        print("Didn't get that...")
+        return continueAfterBirdEye()
 
-            
+def print_plane_coordinates(plane_coordinates):
+    print("Plane coordinates:")
+    print("Top-left: {}".format(plane_coordinates[0]))
+    print("Bottom-left: {}".format(plane_coordinates[1]))
+    print("Top-right: {}".format(plane_coordinates[2]))
+    print("Bottom-right: {}".format(plane_coordinates[3]))
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -221,4 +257,3 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     people_tracker(args)
-
