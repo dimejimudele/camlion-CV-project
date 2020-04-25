@@ -17,7 +17,7 @@ class PersonDetection:
         self.coordinates = None
 
     def compute_bottom_point(self):
-        return (self.centroid[0], self.centroid[1] - self.height/2)
+        return (self.centroid[0], self.centroid[1] + self.height/2)
 
 
 class Homography:

@@ -195,7 +195,7 @@ def people_tracker(args):
                 pixel_distance = euclidian_distance(transformed_bottom_point[0], transformed_bottom_point[1], transformed_point[0], transformed_point[1])
                 
                 #hardcoded for now
-                distance = 5*pixel_distance/60
+                distance = 5.5*pixel_distance/60
 
                 if distance < 2:
                     people_detected[i].safe = False
