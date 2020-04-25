@@ -12,6 +12,10 @@ import os
 import math
 from bird_eye_view import BirdEyeView
 
+def euclidian_distance(x1, y1, x2, y2):
+    return math.sqrt((x2-x1)**2+(y2-y1)**2)
+
+
 def people_tracker(args):
 
     # load the COCO class labels our YOLO model was trained on
@@ -89,7 +93,7 @@ def people_tracker(args):
         # resize the frame to have a maximum width of 500 pixels (the
         # less data we have, the faster we can process it), then convert
         # the frame from BGR to RGB for dlib
-        frame = imutils.resize(frame, width=500)
+        frame = imutils.resize(frame, width=1000)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # if the frame dimensions are empty, set them
@@ -169,6 +173,18 @@ def people_tracker(args):
                 #draw the person centroid
                 cv2.circle(frame, centroids[i], 4, color, -1)
 
+                #iterates over every person again
+                for j in range (i+1, len(my_idx.flatten())):
+                    distance = 175*euclidian_distance(x,y,boxes[j][0],boxes[j][1])/h
+                    if distance < 200:
+                        color = (0, 0, 255)
+                    elif distance < 300:
+                        color = (0,255,0)
+                    
+                    if distance <= 300 and distance >= 10:               
+                        cv2.line(frame, centroids[i], centroids[j], color, 2)
+        
+    
                 if i != 0:
                     cv2.line(frame, centroids[i], centroids[i-1], (0, 255, 255), 2)
 
