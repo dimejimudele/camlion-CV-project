@@ -198,28 +198,18 @@ def bightness_contrast_enhance(image, alpha = 1.6, beta = 0):
     return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
 def clahe_denoising_enhancement(image, tile_grid_size = (8, 8), clip_limit = 0.3)
-
-    
     """
     image: RGB
 
-
     """
-
-    lab_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2LAB)
-
+    lab_frame = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
     #-----Splitting the LAB image to different channels-------------------------
     l, a, b = cv2.split(lab_frame)
-
-
-        #-----Applying CLAHE to L-channel-------------------------------------------
+    #-----Applying CLAHE to L-channel-------------------------------------------
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
     cl = clahe.apply(l)
-
-
     #-----Merge the CLAHE enhanced L-channel with the a and b channel-----------
     lab_frame_enhanced = cv2.merge((cl,a,b))
-
     #-----Converting image from LAB Color model to RGB model--------------------
     return cv2.cvtColor(lab_frame_enhanced, cv2.COLOR_LAB2RGB)
 
